@@ -74,6 +74,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // add some CORS headers in order to make SharedArrayBuffers work
+    svr->set_post_routing_handler([](const auto& req, auto& res) {
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Cross-Origin-Opener-Policy", "same-origin");
+        res.set_header("Cross-Origin-Embedder-Policy", "require-corp");
+    });
+
     std::cout << "Listening on port " << port << " (http" << (cert.empty() ? ")" : "s)") << std::endl;
 
     return (svr->listen("0.0.0.0", port) ? 0 : -1);
