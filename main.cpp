@@ -15,7 +15,8 @@ void printUsage(const char* argv0) {
     std::cerr << "\nUsage: " << argv0 << " [port] [cert] [key]\n" <<
         "       " << argv0 << "                        - serve http on port 8080\n" <<
         "       " << argv0 << " 80                     - serve http on port 80 (might require sudo)\n" <<
-        "       " << argv0 << " 8443 cert.pem pkey.pem - serve https on port 8443\n";
+        "       " << argv0 << " 8443 cert.pem pkey.pem - serve https on port 8443\n" <<
+        "       " << argv0 << " 8000 --sab             - serve http on port 8000 with SharedArrayBuffer headers (--sab is only supported as last arg for now)\n";
 }
 
 std::uint16_t parsePort(const char* arg) {
@@ -31,6 +32,12 @@ int main(int argc, char* argv[]) {
     std::uint16_t port;
     std::string cert;
     std::string key;
+    bool enableSharedArrayBuffer = false;
+
+    if (argc > 1 && !strcmp(argv[argc - 1], "--sab")) {
+        enableSharedArrayBuffer = true;
+        --argc;
+    }
 
     if (argc == 1) {
         port = 8080;
@@ -74,11 +81,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // add some CORS headers in order to make SharedArrayBuffers work
-    svr->set_post_routing_handler([](const auto& req, auto& res) {
+    svr->set_post_routing_handler([&enableSharedArrayBuffer](const auto& req, auto& res) {
         res.set_header("Access-Control-Allow-Origin", "*");
-        res.set_header("Cross-Origin-Opener-Policy", "same-origin");
-        res.set_header("Cross-Origin-Embedder-Policy", "require-corp");
+        // add some CORS headers in order to make SharedArrayBuffers work
+        if (enableSharedArrayBuffer) {
+            res.set_header("Cross-Origin-Opener-Policy", "same-origin");
+            res.set_header("Cross-Origin-Embedder-Policy", "require-corp");
+        }
     });
 
     std::cout << "Listening on port " << port << " (http" << (cert.empty() ? ")" : "s)") << std::endl;
