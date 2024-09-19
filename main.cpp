@@ -76,17 +76,24 @@ int main(int argc, char* argv[]) {
     }
 
     std::unique_ptr<httplib::Server> svr(cert.empty() ? new httplib::Server() : new httplib::SSLServer(cert.c_str(), key.c_str()));
+
+    svr->Get("/", [](const httplib::Request&, httplib::Response& res) {
+        res.set_content("Hello, World!", "text/plain");
+    });
+
     if (!svr->set_mount_point("/", ".")) {
         std::cerr << "Failed to set the mount point\n";
         return -1;
     }
 
     svr->set_post_routing_handler([&enableSharedArrayBuffer](const auto& req, auto& res) {
-        res.set_header("Access-Control-Allow-Origin", "*");
-        // add some CORS headers in order to make SharedArrayBuffers work
-        if (enableSharedArrayBuffer) {
-            res.set_header("Cross-Origin-Opener-Policy", "same-origin");
-            res.set_header("Cross-Origin-Embedder-Policy", "require-corp");
+        if (req.path != "/") {
+            res.set_header("Access-Control-Allow-Origin", "*");
+            // add some CORS headers in order to make SharedArrayBuffers work
+            if (enableSharedArrayBuffer) {
+                res.set_header("Cross-Origin-Opener-Policy", "same-origin");
+                res.set_header("Cross-Origin-Embedder-Policy", "require-corp");
+            }
         }
     });
 
