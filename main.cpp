@@ -92,5 +92,10 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Listening on port " << port << " (http" << (cert.empty() ? ")" : "s)") << std::endl;
 
-    return (svr->listen("0.0.0.0", port) ? 0 : -1);
+    if (!svr->listen("0.0.0.0", port)) {
+        std::cerr << "Port is already in use, terminating...\n";
+        return -1;
+    }
+
+    return 0;
 }
