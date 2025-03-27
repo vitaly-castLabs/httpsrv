@@ -4,10 +4,19 @@ A simple HTTP(S) server which sucks much less than `python3 -m http.server` (96k
 Based on my fork of tiny but mighty [cpp-httplib](https://github.com/vitaly-castLabs/cpp-httplib).
 
 ## How to build
-Install prerequisites (Ubuntu/Debian):
+Install prerequisites, Ubuntu/Debian:
 ```bash
 sudo apt install -y git g++ cmake libssl-dev libbrotli-dev
 ```
+macOS (start with `xcode-select --install` or `brew install gcc` if you don't have a C++ compiler installed):
+```bash
+brew install git cmake openssl brotli
+```
+Windows (add `gcc` to the scoop install list if you don't have a C++ compiler installed):
+```
+scoop install git cmake openssl brotli
+```
+
 Clone and build:
 ```bash
 git clone https://github.com/vitaly-castLabs/httpsrv.git && \
@@ -21,6 +30,6 @@ cmake --build . --config Release
 ```
 httpsrv                        - serve http on port 8080
 httpsrv 80                     - serve http on port 80 (might require sudo)
-httpsrv 8443 cert.pem pkey.pem - serve https on port 8443
+httpsrv 8443 cert.pem key.pem  - serve https on port 8443
 httpsrv 8000 --sab             - serve http on port 8000 with SharedArrayBuffer headers
 ```
